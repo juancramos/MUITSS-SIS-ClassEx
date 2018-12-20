@@ -5,36 +5,36 @@ const DataTypes = Sequelize.DataTypes;
 
 module.exports = function (app) {
   const sequelizeClient = app.get('sequelizeClient');
-  const neighbors = sequelizeClient.define('neighbors', {
+  const courses = sequelizeClient.define('courses', {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true
     },
-    DNI: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
     name: {
       type: DataTypes.STRING,
       allowNull: false
     },
-    address: {
-      type: DataTypes.STRING,
+    time: {
+      type: DataTypes.DOUBLE,
       allowNull: false
     },
-    ZIPCode: {
-      type: DataTypes.STRING,
+    cost: {
+      type: DataTypes.DECIMAL,
       allowNull: false
     },
-    city: {
-      type: DataTypes.STRING,
+    capacity: {
+      type: DataTypes.INTEGER,
       allowNull: false
     },
-    phoneNumber: {
-      type: DataTypes.STRING,
+    from: {
+      type: DataTypes.DATE,
       allowNull: false
-    }
+    },
+    to: {
+      type: DataTypes.DATE,
+      allowNull: false
+    },
   }, {
     hooks: {
       beforeCount(options) {
@@ -44,13 +44,12 @@ module.exports = function (app) {
   });
 
   // eslint-disable-next-line no-unused-vars
-  neighbors.associate = function (models) {
+  courses.associate = function (models) {
     // Define associations here
     // See http://docs.sequelizejs.com/en/latest/docs/associations/
-    neighbors.hasMany(models.visit_cards, { foreignKey: { allowNull: false } });
-    neighbors.hasMany(models.invoices, { foreignKey: { allowNull: false } });
-    neighbors.hasMany(models.inscriptions, { foreignKey: { allowNull: false } });
+    courses.hasMany(models.subjects, { foreignKey: { allowNull: false } });
+    courses.hasMany(models.inscriptions, { foreignKey: { allowNull: false } });
   };
 
-  return neighbors;
+  return courses;
 };

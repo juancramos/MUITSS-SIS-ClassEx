@@ -5,29 +5,21 @@ const DataTypes = Sequelize.DataTypes;
 
 module.exports = function (app) {
   const sequelizeClient = app.get('sequelizeClient');
-  const neighbors = sequelizeClient.define('neighbors', {
+  const teachers = sequelizeClient.define('teachers', {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true
     },
-    DNI: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
     name: {
       type: DataTypes.STRING,
       allowNull: false
     },
+    suName: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
     address: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    ZIPCode: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    city: {
       type: DataTypes.STRING,
       allowNull: false
     },
@@ -44,13 +36,10 @@ module.exports = function (app) {
   });
 
   // eslint-disable-next-line no-unused-vars
-  neighbors.associate = function (models) {
+  teachers.associate = function (models) {
     // Define associations here
     // See http://docs.sequelizejs.com/en/latest/docs/associations/
-    neighbors.hasMany(models.visit_cards, { foreignKey: { allowNull: false } });
-    neighbors.hasMany(models.invoices, { foreignKey: { allowNull: false } });
-    neighbors.hasMany(models.inscriptions, { foreignKey: { allowNull: false } });
   };
 
-  return neighbors;
+  return teachers;
 };
