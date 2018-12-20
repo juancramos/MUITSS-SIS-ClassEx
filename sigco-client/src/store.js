@@ -21,6 +21,9 @@ export default new Vuex.Store({
   plugins: [
     service('neighbors'),
     service('visit-cards'),
-    service('invoices')
+    service('invoices'),
+    service('courses'),
+    service('subjects'),
+    service('teachers')
   ]
 })

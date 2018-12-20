@@ -138,7 +138,7 @@ export default {
       cost: null,
       adminUsername: null,
       isPaid: false,
-      errors: {},
+      errors: {}
     }
   },
   methods: {
