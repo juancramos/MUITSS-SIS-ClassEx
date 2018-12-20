@@ -15,12 +15,22 @@
                   </b-input>
                 </b-field>
                 <span class="error" v-show="errors['DNI']">{{ errors["DNI"] }}</span>
-                <b-field label="Select visit card to relate in this invoice">
-                  <b-select placeholder="Select" v-model="visit" expanded>
-                    <option v-for="item in visits" :key="item.id" :value="item.id"> {{ item.id }}</option>
-                  </b-select>
-                </b-field>
+ <section>
+        <div class="block">
+            <b-checkbox v-for="item in visits" :key="item.id" v-model="selVisits"
+            :native-value="item.id">
+                {{ item.description }}
+            </b-checkbox>
+        </div>
+    </section>
                 <span class="error" v-show="errors['visit']">{{ errors["visit"] }}</span>
+                   <b-field label="Grand total">
+                  <b-input
+                      name="grandTotal"
+                      v-model="grandTotal"
+                      type="name">
+                  </b-input>
+                </b-field>
               </div>
               <div class="content has-text-centered">
                 <p>
@@ -64,7 +74,8 @@ export default {
     visits () {
       const visits = this.findVisitsInStore({
         query: {
-          $sort: {createdAt: -1}
+          $sort: {createdAt: -1},
+          paid: 0
         }
       })
       return visits && visits.data ? visits.data : []
@@ -81,12 +92,17 @@ export default {
   data() {
     return {
       DNI: null,
-      visit: null,
+      selVisits: [],
       errors: {},
+      grandTotal: 0,
       columns: [
         {
             field: 'id',
             label: 'ID'
+        },
+        {
+            field: 'grandTotal',
+            label: 'total'
         }
       ]
     }
@@ -94,6 +110,7 @@ export default {
   methods: {
     ...mapActions('invoices', { findInvoices: 'find' }),
     ...mapActions('visit-cards', { findVisits: 'find' }),
+    ...mapActions('visit-cards', { updateVisit: 'patch' }),
     ...mapActions('invoices', { createInvoice: 'create' }),
     ...mapActions('neighbors', { findneighborss: 'find' }),
     save() {
@@ -103,16 +120,20 @@ export default {
           this.errors['DNI'] = 'neighbor not found'
           return
         }
-        const gTotal = this.visits.reduce(function (total, x) {
-          return total + x.cost;
-        });
         this.createInvoice({
-          grandTotal: gTotal,
+          grandTotal: this.grandTotal,
           neighborId: nId
-        }).then(() => {
-          this.initializeQuery({ shipId: this.visit, updatedAt: this.date.toISOString() })
+        }).then((data) => {
           this.showTrips = true
           this.username = ''
+          this.selVisits.map(x => {
+            this.updateVisit([x, {
+              invoiceId: data.id
+            }, {}]).catch(err => {
+              this.errors = {}
+              this.errors['username'] = err
+            })
+          })
         }).catch(err => {
           this.errors = {}
           this.errors['username'] = err
@@ -124,9 +145,21 @@ export default {
       return Object.keys(this.errors).length === 0
     }
   },
+  watch:{
+    selVisits(selected) {
+      let total = 0
+      selected.map(x => {
+        const v = this.visits.find(y => y.id === x)
+        total = v ? total + v.cost : total
+      })
+      this.grandTotal = total
+    }
+  },
   mounted() {
     this.findVisits({
-      paid: false
+      query: {
+        paid: 0
+      }
     }).catch(error => console.log(error))
     this.findInvoices().catch(error => console.log(error))
   }

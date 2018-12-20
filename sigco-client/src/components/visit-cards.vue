@@ -62,7 +62,34 @@
       <div class="content has-text-centered">
         <p>
           <template>
-            <b-table :data="visit_cards" :columns="columns"></b-table>
+            <b-table :data="visit_cards">
+              <template slot-scope="props">
+                <b-table-column field="id" label="Id" sortable>
+                  {{ props.row.id }}
+                </b-table-column>
+
+                <b-table-column field="date" label="date" sortable>
+                  {{ props.row.date }}
+                </b-table-column>
+                <b-table-column field="description" label="description" sortable>
+                  {{ props.row.description }}
+                </b-table-column>
+                <b-table-column field="adminUsername" label="adminUsername" sortable>
+                  {{ props.row.adminUsername }}
+                </b-table-column>
+                <b-table-column field="paid" label="paid" sortable>
+                  {{ props.row.paid }}
+                </b-table-column>
+                <b-table-column field="" label="" v-show="props.row.paid === false || props.row.paid === 0">
+                  <button class="button is-primary is-small" 
+                  @click="payVisit(props.row.id)">
+                    <span>Pay </span>
+                    <b-icon pack="fas" icon="angle-right">
+                    </b-icon>
+                  </button>
+                </b-table-column>
+              </template>
+            </b-table>
           </template>
         </p>
       </div>
@@ -112,34 +139,13 @@ export default {
       adminUsername: null,
       isPaid: false,
       errors: {},
-      columns: [
-        {
-            field: 'id',
-            label: 'ID'
-        },
-        {
-            field: 'date',
-            label: 'date',
-        },
-        {
-            field: 'description',
-            label: 'description',
-        },
-        {
-            field: 'adminUsername',
-            label: 'Admin name',
-        },
-        {
-            field: 'paid',
-            label: 'paid',
-        }
-      ]
     }
   },
   methods: {
     ...mapActions('visit-cards', { findvisit_cardss: 'find' }),
     ...mapActions('visit-cards', { createvisit_cards: 'create' }),
     ...mapActions('neighbors', { findneighborss: 'find' }),
+    ...mapActions('visit-cards', { updateVisit: 'patch' }),
     save() {
       if (this.validateForm()) {
         const nId = this.neighbors.find(x => x.DNI === this.DNI).id
@@ -154,7 +160,7 @@ export default {
           cost: this.cost,
           city: this.city,
           adminUsername: this.adminUsername,
-          paid: this.paid,
+          paid: this.isPaid,
           neighborId: nId
         }).then(() => {
         }).catch(err => {
@@ -167,6 +173,15 @@ export default {
       this.errors = {}
  
       return Object.keys(this.errors).length === 0
+    },
+    payVisit(id) {
+       this.updateVisit([id, {
+              paid: true
+            }, {}]).catch(err => {
+              console.log(err)
+              this.errors = {}
+              this.errors['username'] = err
+            })
     }
   },
   created() {
