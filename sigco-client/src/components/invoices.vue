@@ -147,6 +147,14 @@ export default {
         this.errors['grandTotal'] = 'grandTotal is required';
       }
       return Object.keys(this.errors).length === 0;
+    },
+    findVisitsM() {
+      this.findVisits({
+        query: {
+          $sort: { createdAt: -1 }
+        }
+      }).catch(error => console.log(error));
+      this.findInvoices().catch(error => console.log(error));
     }
   },
   watch: {
@@ -157,15 +165,13 @@ export default {
         total = v ? total + v.cost : total;
       });
       this.grandTotal = total;
+    },
+    visits() {
+      this.findVisitsM()
     }
   },
   mounted() {
-    this.findVisits({
-      query: {
-        paid: 0
-      }
-    }).catch(error => console.log(error));
-    this.findInvoices().catch(error => console.log(error));
+    this.findVisitsM()
   }
 };
 </script>
